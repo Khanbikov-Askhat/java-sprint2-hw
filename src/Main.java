@@ -52,7 +52,7 @@ public class Main {
         System.out.println("3 - Сверить отчёты.");
         System.out.println("4 - Вывести информацию о всех месячных отчётах.");
         System.out.println("5 - Вывести информацию о годовом отчёте");
-        System.out.println("6 - выйти из приложения.");
+        System.out.println("6 - Выйти из приложения.");
     }
 
 
