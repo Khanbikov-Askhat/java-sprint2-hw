@@ -1,81 +1,138 @@
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Collections;
-
 
 public class ReportEngine {
 
-    HashMap<Integer, ArrayList<MonthReportRecord>> monthlyReports = new HashMap<>();// Хэш лист для месячных отчетов
+
+    // мапа с хранением отчетов
+    HashMap<Integer, MonthlyReport> monthReports = new HashMap<>();
 
 
-    public ArrayList<YearReportRecord> yearRecord = new ArrayList<>(); //Хэш лист для годового отчета
+    // хранение годового отчета
+    YearlyReport yearlyReport;
 
 
-    // Загрузка файла месячного отчета
-    public void readMonthFile() {
+    //получение месячных отчетов
+    public void monthReportReading() {
         String path;
-        for (int i = 1; i < 4; i++) {
+        for (int i = 0; i <= 3; i++) {
             path = "resources/m.20210" + i + ".csv";
-            loadFileMonthsReport(i, path);
+            int year = 2021;
+            MonthlyReport currentMonth = new MonthlyReport(year, i, path);
+            currentMonth.loadFileMonthsReport();
+            monthReports.put(i, currentMonth);
         }
     }
 
 
-    // Загрузка файла годового отчета
-    public void readYearfile() {
-        loadFileYearReport( "resources/y.2021.csv");
+    //Получение годового отчета
+    public void yearReportReading() {
+        String path = "resources/y.2021.csv";
+        int year = 2021;
+        yearlyReport = new YearlyReport(year, path);
+        yearlyReport.loadFileYearReport();
     }
 
 
-    // Загрузка файла месячного отчета
-    public void loadFileMonthsReport(Integer monthNumber, String path){
-        ArrayList<MonthReportRecord> monthRecord = new ArrayList<>();
-        List<String> linesMonthRecord = readFileContents(path);
-        for (int i = 1; i < linesMonthRecord.size(); i++) {
-            String line = linesMonthRecord.get(i);
-            String[] parts = line.split(",");
-            String itemName = parts[0];
-            Boolean isExpense = Boolean.parseBoolean(parts[1]);
-            int quantity = Integer.parseInt(parts[2]);
-            int sumOfOne = Integer.parseInt(parts[3]);
-            MonthReportRecord month = new MonthReportRecord(itemName, isExpense, quantity, sumOfOne);
-            monthRecord.add(month);
-            monthlyReports.put(monthNumber, monthRecord);
+    //МЕСЯЧЫНЕ ОТЧЕТЫ
+
+
+    // Вывод информации по месячным отчетам
+    public void mostProfitableAndExpenseProduct(Integer number) {
+
+        int maxProfit = 0;
+        int maxExpense = 0;
+        String profit = "";
+        String expense = "";
+        if(monthReports.get(number) == null || monthReports.isEmpty()) {
+            System.out.println("Сначала необходимо считать отчеты по месяцам");
+            return;
+        }
+
+        for (Integer month: monthReports.keySet()){
+            int sum = 0;
+            if (!(month == number)) {
+                continue;
+            }
+            for (int i = 0; i < monthReports.get(month).monthReportRecords.size(); i++) {
+                if (!monthReports.get(month).monthReportRecords.get(i).isExpense) {
+                    sum = monthReports.get(month).monthReportRecords.get(i).quantity * monthReports.get(month).monthReportRecords.get(i).sumOfOne;
+                    if (sum > maxProfit) {
+                        maxProfit = sum;
+                        profit = monthReports.get(month).monthReportRecords.get(i).itemName;
+                    }
+                } else {
+                    sum = monthReports.get(month).monthReportRecords.get(i).quantity * monthReports.get(month).monthReportRecords.get(i).sumOfOne;
+                    if (sum > maxExpense) {
+                        maxExpense = sum;
+                        expense = monthReports.get(month).monthReportRecords.get(i).itemName;
+                    }
+                }
+            }
+            if (number == 1) {
+                System.out.println("Январь");
+                System.out.println("Самый прибыльный товар: " + maxProfit + " - " + profit);
+                System.out.println("Самая большая трата: " + maxExpense + " - " + expense);
+                System.out.println();
+            } else if(number == 2) {
+                System.out.println("Февраль");
+                System.out.println("Самый прибыльный товар: " + maxProfit + " - " + profit);
+                System.out.println("Самая большая трата: " + maxExpense + " - " + expense);
+                System.out.println();
+            } else if (number == 3) {
+                System.out.println("Март");
+                System.out.println("Самый прибыльный товар: " + maxProfit + " - " + profit);
+                System.out.println("Самая большая трата: " + maxExpense + " - " + expense);
+                System.out.println();
+            }
         }
 
     }
 
 
-// Загрузка файла годового отчета
-    public void loadFileYearReport( String path){
 
-        List<String> linesYearRecord = readFileContents(path);
-        for (int i = 1; i < linesYearRecord.size(); i++) {
-            String line = linesYearRecord.get(i);
-            String[] parts = line.split(",");
-            int month = Integer.parseInt(parts[0]);
-            int amount = Integer.parseInt(parts[1]);
-            Boolean isExpense = Boolean.parseBoolean(parts[2]);
-            YearReportRecord yearReport = new YearReportRecord(month, amount, isExpense);
-            yearRecord.add(yearReport);
+    //Метод для получения суммы доходов за месяц
+    public int incomeForMonth (Integer Number) {
+        int incomeForMonth = 0;
+        for (Integer month: monthReports.keySet()) {
+            if (month != Number) {
+                continue;
+            }
+            for (int i = 0; i < monthReports.get(month).monthReportRecords.size(); i++) {
+                if (!monthReports.get(month).monthReportRecords.get(i).isExpense) {
+                    incomeForMonth += (monthReports.get(month).monthReportRecords.get(i).quantity * monthReports.get(month).monthReportRecords.get(i).sumOfOne);
+                }
+            }
         }
-    }
-
-    //Чтение файла
-    List<String> readFileContents(String path) {
-        try {
-            return Files.readAllLines(Path.of(path));
-        } catch (IOException e) {
-            System.out.println("Невозможно прочитать файл с месячным отчётом. Возможно файл не находится в нужной директории.");
-            return Collections.emptyList();
-        }
+        return incomeForMonth;
     }
 
 
+    //Метод для получения суммы расходов за месяц
+    public int expenseForMonth (Integer Number) {
+        int expenseForMonth = 0;
+        for (Integer month: monthReports.keySet()) {
+
+            if (month != Number) {
+                continue;
+            }
+            for (int i = 0; i < monthReports.get(month).monthReportRecords.size(); i++) {
+                if (monthReports.get(month).monthReportRecords.get(i).isExpense) {
+                    expenseForMonth += (monthReports.get(month).monthReportRecords.get(i).quantity * monthReports.get(month).monthReportRecords.get(i).sumOfOne);
+                }
+            }
+
+        }
+        return expenseForMonth;
+    }
+
+
+
+
+
+
+
+    //ГОДОВЫЕ ОТЧЕТЫ
     //Информация о годовом отчете
     public void profitForMonth(int yearNumber){
 
@@ -83,21 +140,22 @@ public class ReportEngine {
         HashMap<Integer, Integer> months = new HashMap<>();
         ArrayList<Integer> monthNumberForYear = new ArrayList<>();
 
-
-        for (YearReportRecord year : yearRecord) {
-            if(year.amount == 0) {
-                System.out.println("Необходимо считать отчеты по месяцам");
+        if(yearlyReport == null) {
+            System.out.println("Сначала необходимо считать годовой отчет");
+            return;
+        }
+        System.out.println("Прибыль по каждому месяцу:");
+        for (int i = 0; i < yearlyReport.yearRecord.size(); i++) {
+            if (!months.containsKey(yearlyReport.yearRecord.get(i).month)){
+                months.put(yearlyReport.yearRecord.get(i).month, 0);
             }
-            if (!months.containsKey(year.month)){
-                months.put(year.month, 0);
-            }
-            if (year.isExpense) {
-                months.put(year.month, months.get(year.month) - year.amount);
+            if (yearlyReport.yearRecord.get(i).isExpense) {
+                months.put(yearlyReport.yearRecord.get(i).month, months.get(yearlyReport.yearRecord.get(i).month) - yearlyReport.yearRecord.get(i).amount);
             } else {
-                months.put(year.month, months.get(year.month) + year.amount);
+                months.put(yearlyReport.yearRecord.get(i).month, months.get(yearlyReport.yearRecord.get(i).month) + yearlyReport.yearRecord.get(i).amount);
             }
-            if (!monthNumberForYear.contains(year.month)) {
-                monthNumberForYear.add(year.month);
+            if (!monthNumberForYear.contains(yearlyReport.yearRecord.get(i).month)) {
+                monthNumberForYear.add(yearlyReport.yearRecord.get(i).month);
             }
             yearMonths.put(yearNumber, monthNumberForYear);
         }
@@ -120,9 +178,14 @@ public class ReportEngine {
     public void averageIncomeForYear(){
         int sum = 0;
         int monthNumber = 0;
-        for (YearReportRecord year : yearRecord) {
-            if (!year.isExpense){
-                sum = sum + year.amount;
+
+        if(yearlyReport == null) {
+            return;
+        }
+
+        for (int i = 0; i < yearlyReport.yearRecord.size(); i++) {
+            if (!yearlyReport.yearRecord.get(i).isExpense){
+                sum = sum + yearlyReport.yearRecord.get(i).amount;
                 monthNumber += 1;
             }
         }
@@ -139,29 +202,32 @@ public class ReportEngine {
     public void averageExpenseForYear(){
         int exp = 0;
         int monthNumber = 0;
-        for (YearReportRecord year : yearRecord) {
-            if (year.isExpense){
-                exp = exp + year.amount;
+
+        if(yearlyReport == null) {
+            return;
+        }
+
+        for (int i = 0; i < yearlyReport.yearRecord.size(); i++) {
+            if (yearlyReport.yearRecord.get(i).isExpense){
+                exp = exp + yearlyReport.yearRecord.get(i).amount;
                 monthNumber += 1;
             }
         }
         if (monthNumber == 3){
             System.out.println("Средний расход за все месяцы в году: " + (exp / monthNumber));
             System.out.println();
-        } else{
-            System.out.println("Для этого необходимо считать отчеты");
         }
     }
 
     // Расчет дохода за месяц
     public int incomeMonthForYear(Integer number) {
         int incomeForYear = 0;
-        for (YearReportRecord year : yearRecord) {
-            if (year.month != number) {
+        for (int i = 0; i < yearlyReport.yearRecord.size(); i++) {
+            if (yearlyReport.yearRecord.get(i).month != number) {
                 continue;
             }
-            if (!year.isExpense) {
-                incomeForYear = year.amount;
+            if (!yearlyReport.yearRecord.get(i).isExpense) {
+                incomeForYear = yearlyReport.yearRecord.get(i).amount;
             }
         }
         return incomeForYear;
@@ -171,108 +237,18 @@ public class ReportEngine {
     //Метод для поиска дохода за один месяц
     public int expenseMonthForYear(Integer number) {
         int expenseForYear = 0;
-        for (YearReportRecord year : yearRecord) {
-            if (year.month != number) {
+        for (int i = 0; i < yearlyReport.yearRecord.size(); i++) {
+            if (yearlyReport.yearRecord.get(i).month != number) {
                 continue;
             }
-            if (year.isExpense) {
-                expenseForYear = year.amount;
+            if (yearlyReport.yearRecord.get(i).isExpense) {
+                expenseForYear = yearlyReport.yearRecord.get(i).amount;
             }
         }
         return expenseForYear;
     }
 
 
-    //Метод для получения суммы доходов за месяц
-    public int incomeForMonth (Integer Number) {
-        int incomeForMonth = 0;
-        for (Integer month: monthlyReports.keySet()) {
-            if (month != Number) {
-                continue;
-            }
-            for (int i = 0; i < monthlyReports.get(month).size(); i++) {
-                if (!monthlyReports.get(month).get(i).isExpense) {
-                    incomeForMonth += (monthlyReports.get(month).get(i).quantity * monthlyReports.get(month).get(i).sumOfOne);
-                }
-            }
-        }
-        return incomeForMonth;
-    }
-
-    //Метод для получения суммы расходов за месяц
-    public int expenseForMonth (Integer Number) {
-        int expenseForMonth = 0;
-        for (Integer month: monthlyReports.keySet()) {
-
-            if (month != Number) {
-                continue;
-            }
-            for (int i = 0; i < monthlyReports.get(month).size(); i++) {
-                if (monthlyReports.get(month).get(i).isExpense) {
-                    expenseForMonth += (monthlyReports.get(month).get(i).quantity * monthlyReports.get(month).get(i).sumOfOne);
-                }
-            }
-
-        }
-        return expenseForMonth;
-    }
-
-
-
-    int statistic = 0; /*Я знаю, что это не совсем правильно, но время 7 утра и писать отдельный метод сил нет совсем,
-    в методе для сравнения месячных и годовых отчетов я вроде обошёл такой "Хардкод", не знаю насколько верно, но я старался
-           */
-    public void mostProfitableAndExpenseProduct(Integer Number) {
-
-        int maxProfit = 0;
-        int maxExpense = 0;
-        String profit = "";
-        String expense = "";
-        for (Integer month: monthlyReports.keySet()){
-            int sum = 0;
-            if (!(month == Number)) {
-                continue;
-            }
-            for (int i = 0; i < monthlyReports.get(month).size(); i++) {
-                if (!monthlyReports.get(month).get(i).isExpense) {
-                    sum = monthlyReports.get(month).get(i).quantity * monthlyReports.get(month).get(i).sumOfOne;
-                    if (sum > maxProfit) {
-                        maxProfit = sum;
-                        profit = monthlyReports.get(month).get(i).itemName;
-                    }
-                } else {
-                    sum = monthlyReports.get(month).get(i).quantity * monthlyReports.get(month).get(i).sumOfOne;
-                    if (sum > maxExpense) {
-                        maxExpense = sum;
-                        expense = monthlyReports.get(month).get(i).itemName;
-                    }
-                }
-            }
-            if (Number == 1) {
-                System.out.println("Январь");
-                System.out.println("Самый прибыльный товар: " + maxProfit + " - " + profit);
-                System.out.println("Самая большая трата: " + maxExpense + " - " + expense);
-                System.out.println();
-            } else if(Number == 2) {
-                System.out.println("Февраль");
-                System.out.println("Самый прибыльный товар: " + maxProfit + " - " + profit);
-                System.out.println("Самая большая трата: " + maxExpense + " - " + expense);
-                System.out.println();
-            } else if (Number == 3) {
-                System.out.println("Март");
-                System.out.println("Самый прибыльный товар: " + maxProfit + " - " + profit);
-                System.out.println("Самая большая трата: " + maxExpense + " - " + expense);
-                System.out.println();
-            }
-        }
-        if (maxProfit== 0  || maxExpense == 0) {
-            statistic += 1;
-        }
-        if (statistic == 3) {
-            System.out.println("Сначала необходимо считать отчеты по месяцам");
-            statistic = 0;
-        }
-    }
 
 
     //Метод для сравнения доходов
@@ -289,13 +265,12 @@ public class ReportEngine {
     public boolean dataExpenseReconciliation(int monthExpenseData, int yearExpenseData) {
         boolean result = false;
         if (monthExpenseData == yearExpenseData) {
-                result = true;
-            }
+            result = true;
+        }
         return result;
     }
 
 
-    //Вызов сравнения месячных и годовых отчетов по расходам в меню
     public void dataExpenseReconciliationForMenu() {
 
         int d = 0;

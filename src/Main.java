@@ -6,44 +6,49 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
         ReportEngine reportEngine = new ReportEngine();
 
         while (true) {
             printMenu();
+            Scanner scanner = new Scanner(System.in);
+
 
             int i = scanner.nextInt();
             if (i == 1) {
-                reportEngine.readMonthFile();
+                reportEngine.monthReportReading();
                 System.out.println("Месячные отчеты считаны");
                 System.out.println();
             } else if (i == 2) {
-                reportEngine.readYearfile();
-                System.out.println("Годовой отчет считан");
+                reportEngine.yearReportReading();
+                System.out.println("Годовые отчеты считаны");
                 System.out.println();
             } else if (i == 3) {
                 reportEngine.dataIncomeReconciliationForMenu();
                 System.out.println();
                 reportEngine.dataExpenseReconciliationForMenu();
                 System.out.println();
+
             } else if (i == 4) {
-                System.out.println("Информация по месечным отчетам:");
+                System.out.println("Информация по месечным отчетам:" );
                 for (int a = 1; a <= 3; a++) {
                     reportEngine.mostProfitableAndExpenseProduct(a);
                 }
+
             } else if (i == 5) {
-                System.out.println("Прибыль по каждому месяцу:");
+                //System.out.println("Рассматриваемый год: " + );
+                //System.out.println("Прибыль по каждому месяцу:");
                 reportEngine.profitForMonth(2021);
                 reportEngine.averageExpenseForYear();
                 reportEngine.averageIncomeForYear();
             } else if (i == 6) {
-            System.out.println("Пока!");
-            scanner.close();
+                System.out.println("Пока!");
+                scanner.close();
             } else {
-            System.out.println("Такой команды нет");
+                System.out.println("Такой команды нет");
             }
         }
     }
+
 
 
     static void printMenu() {
@@ -56,9 +61,11 @@ public class Main {
     }
 
 
-}
 
-/*Я честно очень старался писать верно и по правкам, надеюсь сделал всё правильно, есть момент "хардкода" наверное (222 строка в ReportEngine и с 278 начиная),
-потому что я понятия не имею как обойти дублирование данных, сколько не пытался - не выходило, сделал как мог:)
-Спасибо за ревью!
- */
+
+}
+//Надеюсь теперь я понял всё верноXD я сделал monthlyReport и YearlyReport - классами, которые отвечают только за хранение, было тяжко вснутуть monthlyReport в хешмапу в ReportEngine, я не очень понимаю как сделать это правильно, сделал так как заработало
+//При нажатии в меню 1, программа пишет "Невозможно прочитать файл с месячным отчётом. Возможно файл не находится в нужной директории.", хотя отчеты она считывает и записывает и даже верно
+//Убрал максимум логики из Main'а
+//Плюс убрал тот инт на ранее 222 строке для проверки загруженности отчетов и проверяю на их присутствие через monthReport == null, но из-за этого у меня появляется 3 записи Сначала необходимо считать отчеты по месяцам, потому что метод вызывается 3 раза
+//Но зато я плюс-минус разобрался как вообще работать с этими приколами
