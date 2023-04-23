@@ -6,11 +6,13 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
+
         ReportEngine reportEngine = new ReportEngine();
+        Scanner scanner = new Scanner(System.in);
 
         while (true) {
             printMenu();
-            Scanner scanner = new Scanner(System.in);
+
 
 
             int i = scanner.nextInt();
@@ -29,9 +31,9 @@ public class Main {
                 System.out.println();
 
             } else if (i == 4) {
-                System.out.println("Информация по месечным отчетам:" );
+                //System.out.println("Информация по месечным отчетам:" );
                 for (int a = 1; a <= 3; a++) {
-                    reportEngine.mostProfitableAndExpenseProduct(a);
+                    reportEngine.exceptionOrMostProfitableAndExpenseProduct(a);
                 }
 
             } else if (i == 5) {
